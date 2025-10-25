@@ -53,17 +53,44 @@ docker build -t <nombre imagen>:<tag> .
 ### Ejecutar el archivo Dockerfile y construir una imagen en la versión 1.0
 No olvides verificar en qué directorio se encuentra el archivo Dockerfile
 ```
+FROM centos:7
+RUN sed -i 's|mirrorlist=|#mirrorlist=|g' /etc/yum.repos.d/CentOS-*.repo && \
+    sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*.repo
+RUN yum clean all && yum makecache
+RUN yum install -y httpd
+COPY ./web /var/www/html
+EXPOSE 80
+CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]
 
 ```
 
+```
+docker build -t apache-centos:1.0 .
+```
+
+![alt text](image-6.png)
+
 **¿Cuántos pasos se han ejecutado?**
-# RESPONDER 
+En total hubo 7 líneas en el archivo de Docker, pero se completaron 11 pasos. 
 
 ### Inspeccionar la imagen creada
-# COMPLETAR CON UNA CAPTURA
+```
+docker image inspect apache-centos:1.0
+```
+![alt text](image-2.png)
+
+![alt text](image-3.png)
 
 **Modificar el archivo index.html para incluir su nombre y luego crear una nueva versión de la imagen anterior**
 **¿Cuántos pasos se han ejecutado? ¿Observa algo diferente en la creación de la imagen**
+```
+docker image inspect apache-centos:2.0
+```
+![alt text](image-4.png)
+
+Se ejecutaron los mismos pasos. Lo unico que se vuelve a construit es la parte modificada (index.html). 
+
+![alt text](image-5.png)
 
 ## Mecanismo de caché
 Docker usa un mecanismo de caché cuando crea imágenes para acelerar el proceso de construcción y evitar la repetición de pasos que no han cambiado. Cada instrucción en un Dockerfile crea una capa en la imagen final. Docker intenta reutilizar las capas de una construcción anterior si no han cambiado, lo que reduce significativamente el tiempo de construcción.
@@ -75,14 +102,17 @@ Docker usa un mecanismo de caché cuando crea imágenes para acelerar el proceso
 
 ### Crear un contenedor a partir de las imagen creada, mapear todos los puertos
 ```
-
+docker run -d -P --name apache-server apache-centos:1.0
 ```
 
 ### ¿Con que puerto host se está realizando el mapeo?
-# COMPLETAR CON LA RESPUESTA
+
+![alt text](image-7.png)
+
+Mapeó el puerto 80 del contenedor al puerto 32768 del host.
 
 **¿Qué es una imagen huérfana?**
-# COMPLETAR CON LA RESPUESTA
+Llamada como dangling image, es dicha imagen que no tiene un tag y tampoco se encuentra asociado a ningún contenedor. Esto suele suceder cuando se interrumpe la construcción de la imagen, se eliminan contenedores o se reconstruye la imagen y la versión anterior no tiene una referencia. Deben ser limpiadas con regularidad. 
 
 ### Identificar imágenes huérfanas
 ```

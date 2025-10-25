@@ -10,7 +10,13 @@ Asignar núcleos de CPU específicos:
 ```
 
 **¿Como saber el numero de procesadores virtuales que tiene una máquina?**
-## COMPLETAR
+
+En el sistema operativo Windows se utiliza el comando: 
+```
+wmic cpu get NumberOfLogicalProcessors
+```
+
+![alt text](image.png)
 
 ## Ejemplos
 _Puedes copiar y ejecutar directamente cada uno de los comandos_
